@@ -1,0 +1,106 @@
+! ----------------------------------------
+!  Cisco IE-2000-8TC-L switch configuration 
+! ----------------------------------------
+!
+! Get timestamps in milliseconds
+!
+service timestamps debug datetime msec
+service timestamps log datetime msec
+!
+! Basic configuration
+!
+service password-encryption
+hostname IE2000
+enable secret 9 $9$6JiLJIFpFyYcqG$mLud21oFO5.ti0P8AiLF8YaZMT0JTCwGQhEkICQXGOE
+username admin password 7 044B0A151C36435C0D
+no ip domain-lookup
+ip domain-name ieee2000.cisco.com
+!
+! Disable PROFINET
+!
+no profinet
+no profinet mrp
+!
+! Enable QoS globally, for incomming DSCP markings
+!
+mls qos
+!
+! SSH access keys, and iplite license
+!
+crypto pki trustpoint TP-self-signed-3105246592
+ enrollment selfsigned
+ subject-name cn=IOS-Self-Signed-Certificate-3105246592
+ revocation-check none
+ rsakeypair TP-self-signed-3105246592
+!
+crypto pki certificate chain TP-self-signed-3105246592
+ certificate self-signed 01
+  3082022B 30820194 A0030201 02020101 300D0609 2A864886 F70D0101 05050030 
+  31312F30 2D060355 04031326 494F532D 53656C66 2D536967 6E65642D 43657274 
+  69666963 6174652D 33313035 32343635 3932301E 170D3036 30313032 30303030 
+  35315A17 0D333030 31303130 30303030 305A3031 312F302D 06035504 03132649 
+  4F532D53 656C662D 5369676E 65642D43 65727469 66696361 74652D33 31303532 
+  34363539 3230819F 300D0609 2A864886 F70D0101 01050003 818D0030 81890281 
+  8100C2F5 F737AC8D 7F1921D7 F8A5A8BB 82095824 219769E7 C4599870 681EC9E3 
+  F1A425CA 88D75C9F E8946A17 31CA0E92 79EBC9F1 9AAC4331 ABE5769D 1B0222BA 
+  2B2322C3 A4B8ECE2 E43D092B F5210D7F D36821BB 9D37F179 835CF0E6 0B1090CE 
+  AEF55879 FA828C41 41EF9F55 8262CC50 00D18830 160CCEE7 4DFCB3BA 1F5B6034 
+  A8A10203 010001A3 53305130 0F060355 1D130101 FF040530 030101FF 301F0603 
+  551D2304 18301680 14CB20EB CFF7B158 793ABACE 3AC1E60E A12FC1EC EE301D06 
+  03551D0E 04160414 CB20EBCF F7B15879 3ABACE3A C1E60EA1 2FC1ECEE 300D0609 
+  2A864886 F70D0101 05050003 81810064 A6F43FB7 36F78C18 CAD501D2 2876888E 
+  A6192CBA DF57CAE4 17857896 6AB7D0C2 AD5BE35F AC670454 E52010BA 69F75DCB 
+  E26F2B75 11C9BB26 95D52349 04BEA1CA D5FC2165 C1F6D9F0 81D75760 C882FF7E 
+  32EFB0B6 BB89380D F7BA3188 7D8FA86D DBDD2095 01E1D8A9 FFA0E15A 679FF2AC 
+  A7DF59CD 5C9CBA2E 5D057453 06D2BC
+  	quit
+license boot level iplite
+!
+! Enable MRP as client globally
+!
+mrp ring 1
+ mode client
+!
+! Disable CDP
+!
+no cdp run
+!
+! Only interface 1/1 and 1/2 where used, MRP requires trunk, no DTP, trust incomming DSCP
+!
+interface FastEthernet1/1
+ switchport mode trunk
+ switchport nonegotiate
+ mrp ring 1
+ mls qos trust dscp
+!
+interface FastEthernet1/2
+ switchport mode trunk
+ switchport nonegotiate
+ mrp ring 1
+ mls qos trust dscp
+!
+! Management settings 
+!         
+interface Vlan1
+ ip address 192.168.1.102 255.255.255.0
+!
+ip default-gateway 192.168.1.102
+no ip forward-protocol nd
+!
+ip http server
+ip http secure-server
+ip ssh version 2
+!
+line con 0
+ logging synchronous
+ login local
+line vty 0 4
+ password 7 00141215174C04140B
+ login local
+ transport input telnet ssh
+line vty 5 15
+ password 7 00141215174C04140B
+ login local
+ transport input telnet ssh
+!
+end

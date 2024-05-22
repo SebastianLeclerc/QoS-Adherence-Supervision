@@ -1,0 +1,82 @@
+! ----------------------------------------
+!  Red Lion NT4008-PN switch configuration 
+! ----------------------------------------
+!
+hostname nt4008pnm
+!
+! Accessible via HTTP(S), Telnet and SSH
+!
+ip http secure-server
+ip http secure-redirect
+ip ssh
+ip telnet
+!
+! Port mirroring from interface 1/1 to 1/3 to see the closed MRP ring behaviour, during troubleshooting
+! Remove comment (!) if needed
+!
+!monitor session 1 source interface GigabitEthernet 1/1 both
+!monitor session 1 source interface GigabitEthernet 1/3 rx
+!monitor session 1 destination interface GigabitEthernet 1/3
+!monitor session 1
+!
+! Basic SNMP version 1 and 2 settings
+!
+snmp-server
+snmp-server engine-id local 80006edd030007af108740
+snmp-server contact In a galaxy far far away
+snmp-server location no
+snmp-server community public ip-range 0.0.0.0 0.0.0.0 encrypted a0cf8a639991202383d8b32975550c26ba7ddb57c1ae00b57ff6e10e5fadae1db850c16691c850f7946573932acc8396be0135f3e007fd678f46441a3855d3f4
+snmp-server community private ip-range 0.0.0.0 0.0.0.0 encrypted 9266138cdb199476255880418fc42287008221d5e69dc46880dacd6bc4037305317c67e7136ea1be61d5a09c3537cc965469c7410f2f822382c4bd840a3e6a2f
+snmp-server user sbe engine-id 80006edd030007af108740 md5 encrypted 359748AA8FCDC63E7C38C1856F7DD344 priv des encrypted 359748AA8FCDC63E7C38C1856F7DD344
+snmp-server security-to-group model v1 name public group default_ro_group
+snmp-server security-to-group model v1 name private group default_rw_group
+snmp-server security-to-group model v2c name public group default_ro_group
+snmp-server security-to-group model v2c name private group default_rw_group
+snmp-server access default_ro_group model any level noauth read default_view 
+snmp-server access default_rw_group model any level noauth read default_view write default_view
+!
+!
+! Only interface 1/1 and 1/2 were modified to trust QoS tags
+!
+interface GigabitEthernet 1/1
+ no lldp transmit
+ qos trust tag
+ no spanning-tree
+!
+interface GigabitEthernet 1/2                      
+ no lldp transmit
+ qos trust tag
+ no spanning-tree
+!
+! Management access via VLAN 1
+!
+interface vlan 1
+ ip address 192.168.1.103 255.255.255.0
+!
+! No STP on the ring
+!
+spanning-tree aggregation
+ no spanning-tree
+!
+! PROFINET had to be disabled for Ethernet-based MRP
+!
+profinet
+mode disable
+!
+! MRP configuration for a ring with Max. Recovery Time of 200 ms
+!
+mrp group 1
+ role manager
+ ring-port1 interface GigabitEthernet 1/1
+ ring-port2 interface GigabitEthernet 1/2
+ manager topology-change-interval 10               
+ manager topology-change-repeat-count 3
+ manager test-short-interval 10
+ manager test-default-interval 20
+ manager test-monitoring-count 3
+ client link-down-interval 20
+ client link-up-interval 20
+ client link-change-count 4
+ mode enable
+!
+end                                                
