@@ -20,6 +20,10 @@ sudo apt-get install libboost-all-dev
 ```
 
 ## Usage
+Upload and apply switch configuration: 
+1. Red Lion, Model: NT-4008-000-PN-M, Firmware: 1.0.9
+2. Cisco, Model: IE-2000-8TC-L, IOS: 15.2(7)E2
+
 Change the priority of the network interrupts for each core, by first finding the PID of each process
 ```bash
 ps -A | grep ksoftirq
