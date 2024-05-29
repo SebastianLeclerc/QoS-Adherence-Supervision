@@ -1,4 +1,5 @@
 # QoS-Adherence-Supervision
+Tested on Ubuntu 20.04.6 LTS (Focal Fossa)
 The agent polls a switch (Red Lion) over Telnet (default port 23) for Tx counters every second from the Secondary. \
 These values were called QoS statistics, according to the switch documentation. \
 If the Tx counters are below or above an expected threshold (1050), the agent sends appropriate Access Control List (ACL) to correct the Quality of Service (QoS) switch configuration by re-prioritizing traffic flows. \
